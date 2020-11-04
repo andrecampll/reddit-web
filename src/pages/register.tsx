@@ -1,27 +1,42 @@
 import {
   Box,
   Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input
 } from '@chakra-ui/core';
 import { Form, Formik } from 'formik';
+import { useMutation } from 'urql';
 import { InputField } from '../components/InputField';
 import { Wrapper } from '../components/Wrapper';
 
 interface registerProps {}
 
+const REGISTER_MUTATION = `
+  mutation Register($username: String!, $password: String!){
+    register(options: { username: $username, password: $password }) {
+      errors {
+        message
+      }
+      user {
+        id
+        username
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
 const Register: React.FC<registerProps> = ({}) => {
+  const [, register] = useMutation(REGISTER_MUTATION);
+
   return (
     <Wrapper variant="small" >
       <Formik
         initialValues={{ username: '', password: '' }}
         onSubmit={values => {
-          console.log(values);
+          return register(values);
         }}
       >
-        {({values, handleChange, isSubmitting}) => (
+        {({ isSubmitting }) => (
           <Form>
             <InputField
               name="username"
